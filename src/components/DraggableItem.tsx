@@ -54,9 +54,9 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
           e.stopPropagation();
           onDelete?.();
         }}
-        className="absolute top-0 right-0 w-5 h-5 bg-black/10 backdrop-blur-sm text-black/60 rounded-full items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm hidden group-hover:flex hover:bg-red-500 hover:text-white"
+        className="absolute top-0 right-0 w-6 h-6 bg-white/20 dark:bg-black/30 backdrop-blur-md text-slate-800 dark:text-white rounded-full items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10 shadow-lg border border-white/30 dark:border-white/10 hidden group-hover:flex hover:bg-red-500 hover:text-white dark:hover:bg-red-600 hover:border-transparent scale-90 group-hover:scale-100"
       >
-        <X size={12} />
+        <X size={14} strokeWidth={2.5} />
       </button>
       <div className="relative pointer-events-none select-none">
         {children}

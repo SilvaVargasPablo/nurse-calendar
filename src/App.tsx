@@ -221,46 +221,51 @@ export default function App() {
               ))}
             </div>
 
-            {/* Sticker Layer (Strictly contained) */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+            {/* Draggable Layer (Strictly contained within calendar area) */}
+            <div className="absolute inset-x-0 bottom-0 top-[31px] overflow-hidden pointer-events-none rounded-b-2xl">
               <AnimatePresence>
                 {filteredStickers.map(sticker => (
-                  <DraggableItem 
-                    key={sticker.id}
-                    x={sticker.x}
-                    y={sticker.y}
-                    containerRef={containerRef}
-                    onDragEnd={(x, y) => {
-                      if (!containerRef.current) return;
-                      const rect = containerRef.current.getBoundingClientRect();
-                      const PADDING = 20;
-                      const clampedX = Math.max(PADDING, Math.min(x, rect.width - 60));
-                      const clampedY = Math.max(PADDING, Math.min(y, rect.height - 60));
-                      updateStickerPos(sticker.id, clampedX, clampedY);
-                    }}
-                    onDelete={() => handleDeleteSticker(sticker.id)}
-                  >
-                    <div className="text-4xl drop-shadow-lg select-none p-2 pointer-events-auto">
-                      {sticker.emoji}
-                    </div>
-                  </DraggableItem>
+                  <div key={sticker.id} className="pointer-events-auto contents">
+                    <DraggableItem 
+                      x={sticker.x}
+                      y={sticker.y}
+                      containerRef={containerRef}
+                      onDragEnd={(x, y) => {
+                        if (!containerRef.current) return;
+                        const rect = containerRef.current.getBoundingClientRect();
+                        const ITEM_SIZE = 48; // Aprox emoji size
+                        const TOP_OFFSET = 31; // Calendar header height
+                        
+                        const clampedX = Math.max(0, Math.min(x, rect.width - ITEM_SIZE));
+                        const clampedY = Math.max(0, Math.min(y, rect.height - ITEM_SIZE - TOP_OFFSET));
+                        updateStickerPos(sticker.id, clampedX, clampedY);
+                      }}
+                      onDelete={() => handleDeleteSticker(sticker.id)}
+                    >
+                      <div className="text-4xl drop-shadow-lg select-none p-1 pointer-events-auto">
+                        {sticker.emoji}
+                      </div>
+                    </DraggableItem>
+                  </div>
                 ))}
 
                 {filteredNotes.map(note => (
-                  <DraggableNote
-                    key={note.id}
-                    note={note}
-                    containerRef={containerRef}
-                    onUpdate={handleUpdateNote}
-                    onDragEnd={(id, x, y) => {
-                       if (!containerRef.current) return;
-                       const rect = containerRef.current.getBoundingClientRect();
-                       const clampedX = Math.max(0, Math.min(x, rect.width - 250));
-                       const clampedY = Math.max(0, Math.min(y, rect.height - 200));
-                       updateNotePos(id, clampedX, clampedY);
-                    }}
-                    onDelete={() => handleDeleteNote(note.id)}
-                  />
+                  <div key={note.id} className="pointer-events-auto contents">
+                    <DraggableNote
+                      note={note}
+                      containerRef={containerRef}
+                      onUpdate={handleUpdateNote}
+                      onDragEnd={(id, x, y) => {
+                        if (!containerRef.current) return;
+                        const rect = containerRef.current.getBoundingClientRect();
+                        const TOP_OFFSET = 31;
+                        const clampedX = Math.max(0, Math.min(x, rect.width - 250));
+                        const clampedY = Math.max(0, Math.min(y, rect.height - 200 - TOP_OFFSET));
+                        updateNotePos(id, clampedX, clampedY);
+                      }}
+                      onDelete={() => handleDeleteNote(note.id)}
+                    />
+                  </div>
                 ))}
               </AnimatePresence>
             </div>
