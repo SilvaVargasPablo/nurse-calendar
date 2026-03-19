@@ -26,7 +26,7 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
     <motion.div
       drag
       dragMomentum={false}
-      dragElastic={0.1}
+      dragElastic={0} // Prevents bouncing outside the border
       dragConstraints={containerRef}
       onDragStart={onDragStart}
       onDrag={(_, info) => {
@@ -40,7 +40,12 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
       initial={{ scale: 0, x, y }}
       animate={{ scale: 1, x, y }}
       exit={{ scale: 0, opacity: 0 }}
-      style={{ position: 'absolute', cursor: 'grab', zIndex: 30 }}
+      style={{ 
+        position: 'absolute', 
+        cursor: 'grab', 
+        zIndex: 30,
+        padding: '8px' // Buffer to prevent emoji edge from touching the limit
+      }}
       whileDrag={{ scale: 1.1, cursor: 'grabbing', zIndex: 100 }}
       className="group"
     >
@@ -49,11 +54,13 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
           e.stopPropagation();
           onDelete?.();
         }}
-        className="absolute -top-2 -right-2 w-5 h-5 bg-slate-300 text-slate-600 rounded-full items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm hidden group-hover:flex hover:bg-slate-400 hover:text-slate-800"
+        className="absolute top-0 right-0 w-5 h-5 bg-black/10 backdrop-blur-sm text-black/60 rounded-full items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm hidden group-hover:flex hover:bg-red-500 hover:text-white"
       >
         <X size={12} />
       </button>
-      {children}
+      <div className="relative pointer-events-none select-none">
+        {children}
+      </div>
     </motion.div>
   );
 };

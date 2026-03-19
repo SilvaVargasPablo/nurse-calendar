@@ -1,5 +1,5 @@
 import { format, isSameMonth, isToday } from 'date-fns';
-import { StickyNote as NoteIcon, Eye } from 'lucide-react';
+import { StickyNote as NoteIcon } from 'lucide-react';
 import type { DayShiftPart } from '../types';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -16,6 +16,7 @@ interface DayCellProps {
   onToggleNote?: () => void;
   hasNote?: boolean;
   isNoteMinimized?: boolean;
+  noteColor?: string; // New: specific color of the note
   isDarkMode?: boolean;
 }
 
@@ -27,6 +28,7 @@ export const DayCell: React.FC<DayCellProps> = ({
   onToggleNote,
   hasNote,
   isNoteMinimized,
+  noteColor,
   isDarkMode
 }) => {
   const isCurrentMonth = isSameMonth(date, currentMonth);
@@ -50,27 +52,25 @@ export const DayCell: React.FC<DayCellProps> = ({
 
         {isCurrentMonth && (
           <div className="flex gap-1">
-            {hasNote && isNoteMinimized && (
-              <button 
-                onClick={onToggleNote}
-                className="p-1 bg-yellow-100 text-yellow-600 rounded-md hover:bg-yellow-200 transition-colors shadow-sm animate-pulse dark:bg-yellow-900/40 dark:text-yellow-400 dark:hover:bg-yellow-900/60"
-                title="Expandir nota"
-              >
-                <Eye size={12} />
-              </button>
-            )}
-            
             <button 
               onClick={onToggleNote}
               className={cn(
-                "p-1 rounded-md transition-all",
-                hasNote && !isNoteMinimized 
-                  ? (isDarkMode ? "text-blue-400 bg-blue-900/30" : "text-blue-500 bg-blue-50")
-                  : (isDarkMode ? "opacity-0 group-hover:opacity-100 text-slate-500 hover:bg-slate-700" : "opacity-0 group-hover:opacity-100 text-slate-400 hover:bg-slate-200")
+                "p-1 rounded-md transition-all shadow-sm",
+                hasNote && isNoteMinimized 
+                  ? "animate-bounce-subtle" 
+                  : (hasNote && !isNoteMinimized 
+                      ? (isDarkMode ? "text-blue-400 bg-blue-900/30 ring-1 ring-blue-500/30" : "text-blue-500 bg-blue-50 ring-1 ring-blue-500/10")
+                      : (isDarkMode ? "opacity-0 group-hover:opacity-100 text-slate-500 hover:bg-slate-700" : "opacity-0 group-hover:opacity-100 text-slate-400 hover:bg-slate-200")
+                    )
               )}
-              title={hasNote ? "Minimizar nota" : "Agregar nota"}
+              style={hasNote && isNoteMinimized && noteColor ? { 
+                backgroundColor: `${noteColor}22`, 
+                color: noteColor,
+                boxShadow: `0 2px 8px -2px ${noteColor}44` 
+              } : undefined}
+              title={hasNote ? (isNoteMinimized ? "Expandir nota" : "Minimizar nota") : "Agregar nota"}
             >
-              <NoteIcon size={12} />
+              <NoteIcon size={12} fill={hasNote && isNoteMinimized ? noteColor : 'transparent'} fillOpacity={0.4} />
             </button>
           </div>
         )}

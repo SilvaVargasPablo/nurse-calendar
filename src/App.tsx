@@ -11,7 +11,7 @@ import {
   eachDayOfInterval
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Share2, Sun, Moon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { DayCell } from './components/DayCell';
 import { DraggableItem } from './components/DraggableItem';
@@ -191,10 +191,6 @@ export default function App() {
                 </div>
               </button>
             </div>
-
-            <button className={`p-2 rounded-xl transition-all shadow-md active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-900 text-white hover:scale-105'}`}>
-              <Share2 size={18} />
-            </button>
           </div>
         </header>
 
@@ -219,38 +215,55 @@ export default function App() {
                   onToggleNote={() => handleToggleNote(day)}
                   hasNote={notes.some(n => n.dateKey === format(day, 'yyyy-MM-dd'))}
                   isNoteMinimized={notes.find(n => n.dateKey === format(day, 'yyyy-MM-dd'))?.isMinimized}
+                  noteColor={notes.find(n => n.dateKey === format(day, 'yyyy-MM-dd'))?.color}
                   isDarkMode={isDarkMode}
                 />
               ))}
             </div>
 
-            <AnimatePresence>
-              {filteredStickers.map(sticker => (
-                <DraggableItem 
-                  key={sticker.id}
-                  x={sticker.x}
-                  y={sticker.y}
-                  containerRef={containerRef}
-                  onDragEnd={(x, y) => updateStickerPos(sticker.id, x, y)}
-                  onDelete={() => handleDeleteSticker(sticker.id)}
-                >
-                  <div className="text-4xl drop-shadow-lg select-none p-2">
-                    {sticker.emoji}
-                  </div>
-                </DraggableItem>
-              ))}
+            {/* Sticker Layer (Strictly contained) */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              <AnimatePresence>
+                {filteredStickers.map(sticker => (
+                  <DraggableItem 
+                    key={sticker.id}
+                    x={sticker.x}
+                    y={sticker.y}
+                    containerRef={containerRef}
+                    onDragEnd={(x, y) => {
+                      if (!containerRef.current) return;
+                      const rect = containerRef.current.getBoundingClientRect();
+                      const PADDING = 20;
+                      const clampedX = Math.max(PADDING, Math.min(x, rect.width - 60));
+                      const clampedY = Math.max(PADDING, Math.min(y, rect.height - 60));
+                      updateStickerPos(sticker.id, clampedX, clampedY);
+                    }}
+                    onDelete={() => handleDeleteSticker(sticker.id)}
+                  >
+                    <div className="text-4xl drop-shadow-lg select-none p-2 pointer-events-auto">
+                      {sticker.emoji}
+                    </div>
+                  </DraggableItem>
+                ))}
 
-              {filteredNotes.map(note => (
-                <DraggableNote
-                  key={note.id}
-                  note={note}
-                  containerRef={containerRef}
-                  onUpdate={handleUpdateNote}
-                  onDragEnd={updateNotePos}
-                  onDelete={() => handleDeleteNote(note.id)}
-                />
-              ))}
-            </AnimatePresence>
+                {filteredNotes.map(note => (
+                  <DraggableNote
+                    key={note.id}
+                    note={note}
+                    containerRef={containerRef}
+                    onUpdate={handleUpdateNote}
+                    onDragEnd={(id, x, y) => {
+                       if (!containerRef.current) return;
+                       const rect = containerRef.current.getBoundingClientRect();
+                       const clampedX = Math.max(0, Math.min(x, rect.width - 250));
+                       const clampedY = Math.max(0, Math.min(y, rect.height - 200));
+                       updateNotePos(id, clampedX, clampedY);
+                    }}
+                    onDelete={() => handleDeleteNote(note.id)}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </main>
